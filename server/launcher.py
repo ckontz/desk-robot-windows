@@ -196,7 +196,7 @@ def env_value(key: str) -> str:
     started in (exported in the shell); "" if neither has it."""
     found = ""
     try:
-        for line in config._ENV_FILE.read_text().splitlines():
+        for line in config._ENV_FILE.read_text(encoding="utf-8").splitlines():
             k, sep, v = line.partition("=")
             if sep and k.strip() == key:
                 found = v.strip().strip('"').strip("'")
@@ -306,7 +306,7 @@ class Handler(BaseHTTPRequestHandler):
         q = urllib.parse.parse_qs(url.query)
         if url.path == "/":
             try:
-                page = PAGE.read_text().replace("{name}", active_name()).encode()
+                page = PAGE.read_text(encoding="utf-8").replace("{name}", active_name()).encode()
             except OSError as e:
                 return self._reply(500, "text/plain", f"dashboard page missing: {e}".encode())
             return self._reply(200, "text/html; charset=utf-8", page)

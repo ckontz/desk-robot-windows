@@ -8,7 +8,7 @@ from pathlib import Path
 # per line. Anything already exported in the shell wins over the file.
 _ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
 if _ENV_FILE.is_file():
-    for _line in _ENV_FILE.read_text().splitlines():
+    for _line in _ENV_FILE.read_text(encoding="utf-8").splitlines():
         _line = _line.strip()
         if not _line or _line.startswith("#") or "=" not in _line:
             continue
