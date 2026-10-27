@@ -427,9 +427,10 @@ class NoBuiltinVoice(RuntimeError):
 # 16 kHz mono WAV out. Built and tested on macOS; this path is untested.
 _WINDOWS_TTS = """
 Add-Type -AssemblyName System.Speech
+[Console]::InputEncoding = [System.Text.Encoding]::UTF8
 $fmt = New-Object System.Speech.AudioFormat.SpeechAudioFormatInfo(16000, [System.Speech.AudioFormat.AudioBitsPerSample]::Sixteen, [System.Speech.AudioFormat.AudioChannel]::Mono)
 $s = New-Object System.Speech.Synthesis.SpeechSynthesizer
-$s.SetOutputToWaveFile($args[0], $fmt)
+$s.SetOutputToWaveFile($env:ROCKY_TTS_OUT, $fmt)
 $s.Speak([Console]::In.ReadToEnd())
 $s.Dispose()
 """
@@ -441,16 +442,19 @@ def _synthesize_builtin(text: str) -> bytes:
     into options ("-f /etc/hosts" would make `say` read a file)."""
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
         path = f.name
+    env = None
     try:
         if sys.platform == "darwin":
             cmd = ["say", "-v", config.TTS_FALLBACK_VOICE, "-o", path, "--data-format=LEI16@16000"]
         elif sys.platform == "win32":
-            cmd = ["powershell", "-NoProfile", "-NonInteractive", "-Command", _WINDOWS_TTS, path]
+            # -Command doesn't fill $args, so the path goes in the environment
+            cmd = ["powershell", "-NoProfile", "-NonInteractive", "-Command", _WINDOWS_TTS]
+            env = dict(os.environ, ROCKY_TTS_OUT=path)
         elif shutil.which("espeak-ng") or shutil.which("espeak"):
             cmd = [shutil.which("espeak-ng") or "espeak", "--stdin", "-w", path]
         else:
             raise NoBuiltinVoice("no built-in voice on this system (install espeak-ng, or set FISH_AUDIO_API_KEY)")
-        subprocess.run(cmd, input=text.encode(), check=True, timeout=60)
+        subprocess.run(cmd, input=text.encode(), check=True, timeout=60, env=env)
         with open(path, "rb") as f:
             wav = f.read()
     finally:
