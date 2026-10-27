@@ -106,10 +106,10 @@ class Brain:
             return "already running"
         if self.external():
             return "a brain started elsewhere is already running"
-        env = dict(LAUNCH_ENV, PYTHONUNBUFFERED="1")
+        env = dict(LAUNCH_ENV, PYTHONUNBUFFERED="1", PYTHONUTF8="1")
         self.log("── launcher: starting the server ──")
         self.proc = subprocess.Popen(
-            [brain_python(), "-u", "-m", "brain.main"], cwd=HERE, env=env, text=True, bufsize=1,
+            [brain_python(), "-u", "-m", "brain.main"], cwd=HERE, env=env, text=True, encoding="utf-8", bufsize=1,
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         self.started_at = time.time()
         self.exit_code = None
