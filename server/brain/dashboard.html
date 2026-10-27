@@ -1797,7 +1797,7 @@ const FaceKit = (() => {
         ? "Key found: he can find a song, artist, album or playlist and play it, and tell you what's playing."
         : "He can tell you what's playing and play, pause or skip. To play songs by name, add a Spotify key to server/.env (SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET; the README shows how) and restart the server. Until then he opens Spotify's search for you to pick.";
       if (cfg.mac === false) {
-        $("pcplatform").textContent = "This computer isn't a Mac, so here he can only search the web and open websites. Apps, music, volume and Shortcuts need a Mac for now; docs/computer-control-windows.md in the project folder has ideas for adding them on Windows.";
+        $("pcplatform").textContent = "This computer isn't a Mac, so here he can search the web, open websites" + (cfg.windows ? " and tell you the time" : "") + ". Apps, music, volume and Shortcuts need a Mac for now; docs/computer-control-windows.md in the project folder has ideas for adding them on Windows.";
         $("pcplatform").classList.add("warn");
         $("spotifynote").textContent = "Spotify and Apple Music control need a Mac for now.";
       }

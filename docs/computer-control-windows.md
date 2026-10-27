@@ -7,6 +7,7 @@ Linux) only part of it works today:
 |---|---|---|
 | "Look up an Arduino on Amazon" (searches) | yes | yes |
 | "Open YouTube" (sites and your bookmarks) | yes | yes |
+| "What time is it?" (runs `TIME /T`) | no | Windows only |
 | "Open Spotify" (apps) | yes | not yet |
 | "Play Mr. Blue Sky", "pause", "next song", "what's playing?" | yes | not yet |
 | "Turn the volume down" | yes | not yet |

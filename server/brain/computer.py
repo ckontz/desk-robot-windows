@@ -10,6 +10,7 @@
   now_playing      what Spotify or Music is playing (or has paused) right now
   computer_volume  this computer's sound: a level, up, down, mute, unmute
   run_shortcut     an Apple Shortcut from your allowed list (settings: computer.shortcuts), after a spoken yes
+  check_time       the time on this computer's clock, from Windows' own `TIME /T` (Windows only)
 
 Safety, because anyone (or any TV) that talks near Rocky can ask:
   - Off until you switch it on in the dashboard (computer.control); the choice is remembered.
@@ -40,6 +41,7 @@ import urllib.request
 import webbrowser
 
 MAC = sys.platform == "darwin"
+WINDOWS = sys.platform == "win32"
 PER_TURN = 3          # actions in one reply
 PER_MINUTE = 8        # actions in any 60 s
 CONFIRM_WINDOW_S = 90.0
@@ -348,6 +350,21 @@ class Computer:
         self._go(f"ran shortcut {match}", go)
         return f"Ran the shortcut \"{match}\"."
 
+    def check_time(self, args: dict) -> str:
+        if not WINDOWS:
+            raise NotDone("that only works on Windows")
+        found: list[str] = []
+
+        def go() -> None:
+            # `time` is a cmd built-in, so it runs as `cmd /c time /t`. The arguments are fixed: nothing the
+            # model says goes into this command.
+            code, out, _ = self._run(["cmd", "/c", "time", "/t"], 5)
+            if code != 0 or not out.strip():
+                raise NotDone("couldn't read the time from this computer")
+            found.append(out.strip())
+        self._go("checked the time", go)
+        return f"The computer's clock says {found[0]}."
+
     def switched_off(self, args: dict) -> str:
         if self.enabled:
             return "Computer control is on now: use the computer abilities you have."
@@ -563,6 +580,9 @@ def tools(c: Computer) -> list[dict]:
                            + ("The first call only asks: you then ask your human to confirm and call again only after "
                               "they say yes." if c.confirm_shortcuts else _SAY.strip()),
                            {"name": {"type": "string", "enum": c.shortcuts}}, ["name"]))
+    if WINDOWS:
+        out.append(_fn("check_time", "Find out what time it is, from your human's computer clock. Call it whenever "
+                       "they ask the time.", {}, []))
     return out
 
 
@@ -582,8 +602,9 @@ ACTIONS = {
     "run_shortcut": controller.run_shortcut,
     "play_music": controller.play_music,
     "now_playing": controller.now_playing,
+    "check_time": controller.check_time,
     "use_computer": controller.switched_off,
 }
 # Done once they succeed and he has said his line: no second call to the model.
-# (now_playing isn't: he has to hear the answer to say it.)
+# (now_playing and check_time aren't: he has to hear the answer to say it.)
 QUICK = {"search_web", "open_website", "open_app", "media", "computer_volume", "run_shortcut", "play_music"}

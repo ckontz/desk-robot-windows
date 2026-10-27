@@ -41,9 +41,32 @@ def make(replies=None, spotify=None, **cfg):
 
 class ComputerTests(unittest.TestCase):
     def setUp(self):
-        p = patch.object(computer, "MAC", True)
-        p.start()
-        self.addCleanup(p.stop)
+        for name, value in (("MAC", True), ("WINDOWS", False)):
+            p = patch.object(computer, name, value)
+            p.start()
+            self.addCleanup(p.stop)
+
+    def test_check_time_runs_time_t_on_windows_only(self):
+        c, f = make(replies={})
+        with self.assertRaises(NotDone):
+            c.check_time({})
+        self.assertEqual(f.cmds, [])
+        names = lambda: {t["function"]["name"] for t in computer.tools(c)}   # noqa: E731
+        self.assertNotIn("check_time", names())
+        with patch.object(computer, "WINDOWS", True):
+            f.run = lambda argv, timeout: (f.cmds.append(argv) or (0, " 04:18 PM\r\n", ""))
+            c = Computer(run=f.run, open_url=f.open)
+            c.configure({"control": True})
+            c.new_turn()
+            self.assertEqual(c.check_time({"command": "dir & del *"}), "The computer's clock says 04:18 PM.")
+            self.assertEqual(f.cmds, [["cmd", "/c", "time", "/t"]])    # nothing the model said is in the command
+            self.assertIn("check_time", names())
+            self.assertNotIn("check_time", computer.QUICK)
+            c = Computer(run=lambda argv, timeout: (1, "", "boom"), open_url=f.open)
+            c.configure({"control": True})
+            c.new_turn()
+            with self.assertRaises(NotDone):
+                c.check_time({})
 
     def test_off_by_default_and_refuses_everything(self):
         self.assertFalse(settings.defaults()["computer"]["control"])

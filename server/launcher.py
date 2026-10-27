@@ -325,6 +325,7 @@ class Handler(BaseHTTPRequestHandler):
                                     "computer_timezone": settings.computer_timezone(),
                                     "spotify_key": spotify_key_set(),
                                     "mac": sys.platform == "darwin",   # apps, music, volume and Shortcuts are Mac only
+                                    "windows": sys.platform == "win32",   # he can tell the time here
                                     "config_defaults": defaults_now})
         if url.path == "/launcher/faces":
             return self._json(200, {"packs": faces.list_packs(), "active": settings.load()["face"]["pack"],
