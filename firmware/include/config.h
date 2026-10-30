@@ -30,10 +30,15 @@ constexpr uint8_t PIN_I2S_DIN = 3;  // D2 → MAX98357A DIN
 // I2C uses the XIAO's default Wire pins (SDA=GPIO5/D4, SCL=GPIO6/D5). The OLED answers at 0x3C.
 
 // ─── Display ─────────────────────────────────────────────────────────────────
-// Which OLED: 1 = the 2.42" SSD1309 (HiLetgo) in the V2 head, 0 = the 1.3" SH1106 of V1. Same 128x64 pixels, so
-// the face code is the same for both.
-#define OLED_SSD1309_242 1
-// Turn the picture 180 degrees: the V2 head holds the 2.42" screen upside down.
+// Which OLED controller. All three are 128x64 on I2C at 0x3C, so the face code is the same for each.
+//   OLED_SSD1309 = the 2.42" (HiLetgo) in the V2 head
+//   OLED_SH1106  = the 1.3" of V1
+//   OLED_SSD1306 = a 0.96" board
+#define OLED_SSD1309 1
+#define OLED_SH1106 2
+#define OLED_SSD1306 3
+#define OLED_TYPE OLED_SSD1306
+// Turn the picture 180 degrees: the V2 head holds the screen upside down.
 constexpr bool OLED_FLIP = true;
 
 // Assembly mode: press the XIAO's BOOT button within ASSEMBLY_WINDOW_MS of

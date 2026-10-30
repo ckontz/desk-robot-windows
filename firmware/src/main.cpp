@@ -24,12 +24,16 @@
 #define HAVE_BRAIN 0
 #endif
 
-// The 128x64 OLED over hardware I2C (SDA=D4/GPIO5, SCL=D5/GPIO6): the V2 head's 2.42" SSD1309, or V1's 1.3"
-// SH1106 (OLED_SSD1309_242 in config.h). OLED_FLIP picks R2 = rotated 180 degrees for an upside-down mount.
-#if OLED_SSD1309_242
+// The 128x64 OLED over hardware I2C (SDA=D4/GPIO5, SCL=D5/GPIO6): the V2 head's 2.42" SSD1309, V1's 1.3" SH1106, or
+// a 0.96" SSD1306 (OLED_TYPE in config.h). OLED_FLIP picks R2 = rotated 180 degrees for an upside-down mount.
+#if OLED_TYPE == OLED_SSD1309
 U8G2_SSD1309_128X64_NONAME0_F_HW_I2C u8g2(OLED_FLIP ? U8G2_R2 : U8G2_R0, U8X8_PIN_NONE);
-#else
+#elif OLED_TYPE == OLED_SH1106
 U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(OLED_FLIP ? U8G2_R2 : U8G2_R0, U8X8_PIN_NONE);
+#elif OLED_TYPE == OLED_SSD1306
+U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(OLED_FLIP ? U8G2_R2 : U8G2_R0, U8X8_PIN_NONE);
+#else
+#error "OLED_TYPE in config.h must be OLED_SSD1309, OLED_SH1106 or OLED_SSD1306"
 #endif
 
 Face face(u8g2);
@@ -147,7 +151,7 @@ void printHelp() {
   Serial.println(F("  glance on|off  allow idle head glances (only happen while the brain is connected and he is awake)"));
   Serial.println(F("  volume <0-1> speaker volume"));
   Serial.println(F("  beep         play a test tone through the speaker"));
-  Serial.println(F("  oled off|on | oled <cmd> [arg]  screen power, or a raw SSD1309 command in hex (whine hunting)"));
+  Serial.println(F("  oled off|on | oled <cmd> [arg]  screen power, or a raw controller command in hex (whine hunting)"));
   Serial.println(F("  mic on|off   stream the microphone to the brain"));
   Serial.println(F("  miclevel     print mic level for 3 s (talk to it)"));
   Serial.println(F("  stream on|off [fps] [qvga|vga]  stream camera JPEGs to the brain"));
@@ -266,7 +270,7 @@ static void runCommand(String line) {
       Serial.println(F("settings: not valid JSON"));
     }
   } else if (cmd == "oled") {
-    // oled off|on, or oled <cmd> [arg] in hex: a raw SSD1309 command for hunting the module's coil whine, e.g.
+    // oled off|on, or oled <cmd> [arg] in hex: a raw controller command for hunting the module's coil whine, e.g.
     // `oled d5 f0` (display clock: osc freq high nibble, divide low), `oled 81 40` (contrast), `oled d9 22`
     // (pre-charge). Lasts until the next reboot.
     if (arg == "off" || arg == "on") {

@@ -73,7 +73,7 @@ Nothing is billed while the robot is idle.
 | Part | Notes |
 | --- | --- |
 | Seeed XIAO ESP32S3 **Sense** | The Sense version has the camera and microphone built in. The little U.FL antenna in the box is required for WiFi. |
-| 2.42" SSD1309 I2C OLED, 128x64 | The face (HiLetgo's board, 70 x 48 mm). V1's 1.3" SH1106 also works: set `OLED_SSD1309_242` to 0 in `firmware/include/config.h`. |
+| 2.42" SSD1309 I2C OLED, 128x64 | The face (HiLetgo's board, 70 x 48 mm). V1's 1.3" SH1106 and a 0.96" SSD1306 also work: set `OLED_TYPE` to `OLED_SH1106` or `OLED_SSD1306` in `firmware/include/config.h`. |
 | 2 x MG90S metal-gear servos | Pan and tilt. |
 | The printed neck and head | Base and dome, turntable (with the 30-tooth pan gear built in), the 38-tooth pinion, head plate, head shell, and its face and back lids. The print files are in the hardware bundle on my website. |
 | MAX98357A I2S amplifier board | In the head. The $3 clones work. |
